@@ -4,7 +4,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -28,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<MonthModel> monthModels;
     private ProgressDialog progressDialog;
     private MonthAdapter adapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,11 +50,12 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
+
         getAllData();
 
 
-
     }
+
 
     private void getAllData() {
         ApiMonth apiMonth = RetrofitClient.getRetrofit().create(ApiMonth.class);
@@ -54,24 +63,23 @@ public class MainActivity extends AppCompatActivity {
         call.enqueue(new Callback<MonthResponse>() {
             @Override
             public void onResponse(Call<MonthResponse> call, Response<MonthResponse> response) {
-                progressDialog.show();
-                if (response.isSuccessful())
-                {
+
+                if (response.isSuccessful()) {
                     MonthResponse monthResponse = response.body();
-                    monthModels = new  ArrayList<>(Arrays.asList(monthResponse.getMonths()));
+                    monthModels = new ArrayList<>(Arrays.asList(monthResponse.getMonths()));
                     adapter = new MonthAdapter(MainActivity.this, monthModels);
                     recyclerView.setAdapter(adapter);
-                    progressDialog.dismiss();
+                    progressDialog.show();
+
                 }
             }
 
             @Override
             public void onFailure(Call<MonthResponse> call, Throwable t) {
-                Toast.makeText(MainActivity.this,"", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "Нет соединения с интернетом!", Toast.LENGTH_LONG).show();
             }
         });
-
-
     }
+
 
 }
