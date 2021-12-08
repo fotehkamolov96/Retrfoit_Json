@@ -4,23 +4,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import com.example.retrfoit_json.api.MonthResponse;
+import com.example.retrfoit_json.adapter.SearchResponse;
 import com.example.retrfoit_json.R;
-import com.example.retrfoit_json.RetrofitClient;
-import com.example.retrfoit_json.adapter.MonthAdapter;
-import com.example.retrfoit_json.api.ApiMonth;
-import com.example.retrfoit_json.model.MonthModel;
+import com.example.retrfoit_json.adapter.RetrofitClient;
+import com.example.retrfoit_json.adapter.SearchAdapter;
+import com.example.retrfoit_json.adapter.ApiInterface;
+import com.example.retrfoit_json.adapter.SearchModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,52 +24,54 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    private RecyclerView recyclerView;
-    private ArrayList<MonthModel> monthModels;
+
     private ProgressDialog progressDialog;
-    private MonthAdapter adapter;
+    private RecyclerView recyclerView;
+    private ArrayList<SearchModel> searchModels;
+    private SearchAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Please wait.....");
+  /*      progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Пожалуйста подождите.....");
         progressDialog.setCancelable(false);
-        progressDialog.show();
+        progressDialog.show();*/
 
         recyclerView = findViewById(R.id.recyclerview);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-
         getAllData();
-
-
     }
 
 
     private void getAllData() {
-        ApiMonth apiMonth = RetrofitClient.getRetrofit().create(ApiMonth.class);
-        Call<MonthResponse> call = apiMonth.getAllResponse();
-        call.enqueue(new Callback<MonthResponse>() {
-            @Override
-            public void onResponse(Call<MonthResponse> call, Response<MonthResponse> response) {
+        ApiInterface apiInterface = RetrofitClient.getRetrofit().create(ApiInterface.class);
+        Call<SearchResponse> call = apiInterface.getAllResponse();
 
+        call.enqueue(new Callback<SearchResponse>() {
+            @Override
+            public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
+                progressDialog.dismiss();
                 if (response.isSuccessful()) {
-                    MonthResponse monthResponse = response.body();
-                    monthModels = new ArrayList<>(Arrays.asList(monthResponse.getMonths()));
-                    adapter = new MonthAdapter(MainActivity.this, monthModels);
+
+                    SearchResponse monthResponse = response.body();
+                    assert monthResponse != null;
+                    searchModels = new ArrayList<>(Arrays.asList(monthResponse.getSearch()));
+                    adapter = new SearchAdapter(MainActivity.this, searchModels);
                     recyclerView.setAdapter(adapter);
-                    progressDialog.show();
+                    //progressDialog.dismiss();
 
                 }
             }
 
             @Override
-            public void onFailure(Call<MonthResponse> call, Throwable t) {
-                Toast.makeText(MainActivity.this, "Нет соединения с интернетом!", Toast.LENGTH_LONG).show();
+            public void onFailure(Call<SearchResponse> call, Throwable t) {
+                progressDialog.show();
+                //Toast.makeText(MainActivity.this, "Нет соединения с интернетом!", Toast.LENGTH_LONG).show();
             }
         });
     }

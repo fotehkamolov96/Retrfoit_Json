@@ -1,6 +1,6 @@
-package com.example.retrfoit_json.model;
+package com.example.retrfoit_json.adapter;
 
-public class MonthModel {
+public class SearchModel {
     private int id;
     private String nametitle;
     private String description;
@@ -9,7 +9,7 @@ public class MonthModel {
         return id;
     }
 
-    public MonthModel(int id, String nametitle, String description) {
+    public SearchModel(int id, String nametitle, String description) {
         this.id = id;
         this.nametitle = nametitle;
         this.description = description;
